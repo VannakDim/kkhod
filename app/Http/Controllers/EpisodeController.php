@@ -119,7 +119,7 @@ class EpisodeController extends Controller
     public function show(Course $course, Episode $episode)
     {
         $isEnrolled = auth()->check() && auth()->user()->enrolledCourses->contains($course->id);
-        
+
         if (!$isEnrolled && !$episode->is_preview && !auth()->user()?->can('update', $course)) {
             abort(403, 'You need to enroll in this course to view this episode.');
         }
@@ -136,4 +136,5 @@ class EpisodeController extends Controller
 
         return view('episodes.show', compact('course', 'episode', 'nextEpisode', 'prevEpisode', 'isEnrolled'));
     }
+
 }

@@ -7,7 +7,7 @@ use App\Models\Episode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
-// use Intervention\Image\Laravel\Facades\Image;
+use League\CommonMark\CommonMarkConverter;
 
 class CourseController extends Controller
 {
@@ -20,8 +20,21 @@ class CourseController extends Controller
     {
         // return view('courses.create');
         $courses = Course::where('is_published', true)->with('user')->latest()->get();
+
         return view('courses.index', compact('courses'));
     }
+
+    // public function show(Episode $episode)
+    // {
+    //     $converter = new CommonMarkConverter([
+    //         'html_input' => 'allow',
+    //         'allow_unsafe_links' => false,
+    //     ]);
+
+    //     $episode->html = $converter->convertToHtml($episode->description);
+
+    //     return view('episodes.show', compact('episode'));
+    // }
 
     public function create()
     {
@@ -68,6 +81,11 @@ class CourseController extends Controller
         }
 
         $course->load(['episodes', 'user']);
+        $converter = new CommonMarkConverter([
+            'html_input' => 'allow',
+            'allow_unsafe_links' => false,
+        ]);
+        $course->outline_html = $converter->convertToHtml($course->outline);
         $isEnrolled = auth()->check() && auth()->user()->enrolledCourses->contains($course->id);
 
         return view('courses.show', compact('course', 'isEnrolled'));
@@ -75,10 +93,10 @@ class CourseController extends Controller
 
 
     public function edit(Course $course)
-{
-    // $this->authorize('update', $course);
-    return view('courses.edit', compact('course'));
-}
+    {
+        // $this->authorize('update', $course);
+        return view('courses.edit', compact('course'));
+    }
 
     public function update(Request $request, Course $course)
     {
