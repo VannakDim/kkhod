@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn Platform - @yield('title')</title>
+    <title>Learn KKHOD - @yield('title')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -42,7 +42,7 @@
             <div class="flex justify-between">
                 <div class="flex space-x-7">
                     <div class="flex items-center py-4">
-                        <a href="{{ route('home') }}" class="text-xl font-bold text-gray-800">K KHODgit </a>
+                        <a href="{{ route('home') }}" class="text-xl font-bold text-gray-800">K KHOD </a>
                     </div>
                     <div class="flex items-center space-x-4">
                         <a href="{{ route('courses.index') }}"
