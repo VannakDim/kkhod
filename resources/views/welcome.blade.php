@@ -10,12 +10,13 @@
         <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Start, switch, or advance your career with our comprehensive courses taught by expert instructors.
         </p>
-        <div class="space-x-4">
-            <a href="{{ route('courses.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+            <a href="{{ route('courses.index') }}" class="w-full sm:w-auto text-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:px-8 rounded-lg text-base sm:text-lg">
                 Browse Courses
             </a>
+
             @guest
-            <a href="{{ route('register') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg">
+            <a href="{{ route('register') }}" class="w-full sm:w-auto text-center bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 sm:px-8 rounded-lg text-base sm:text-lg">
                 Start Learning Free
             </a>
             @endguest
