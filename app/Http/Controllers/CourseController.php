@@ -75,8 +75,10 @@ class CourseController extends Controller
         return redirect()->route('courses.index')->with('success', 'Course created successfully!');
     }
 
-    public function show(Course $course)
+    public function show($slug)
     {
+        $course = Course::where('slug', $slug)->firstOrFail();
+        
         if (!$course->is_published && !auth()->user()?->can('update', $course)) {
             abort(404);
         }
@@ -93,14 +95,16 @@ class CourseController extends Controller
     }
 
 
-    public function edit(Course $course)
+    public function edit($slug)
     {
+        $course = Course::where('slug', $slug)->firstOrFail();
         // $this->authorize('update', $course);
         return view('courses.edit', compact('course'));
     }
 
-    public function update(Request $request, Course $course)
+    public function update(Request $request, $slug)
     {
+        $course = Course::where('slug', $slug)->firstOrFail();
         // $this->authorize('update', $course);
 
         $validated = $request->validate([
@@ -134,7 +138,7 @@ class CourseController extends Controller
 
         $course->update($validated);
 
-        return redirect()->route('courses.show', $course)->with('success', 'Course updated successfully!');
+        return redirect()->route('courses.show', $course->slug)->with('success', 'Course updated successfully!');
     }
 
     public function destroy(Course $course)

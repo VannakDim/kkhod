@@ -5,7 +5,7 @@
 @section('content')
     <div class="max-w-4xl mx-auto">
         <div class="mb-6">
-            <a href="{{ route('courses.show', $course) }}" class="text-blue-600 hover:text-blue-800">
+            <a href="{{ route('courses.show', $course->slug) }}" class="text-blue-600 hover:text-blue-800">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Course
             </a>
         </div>

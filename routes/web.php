@@ -31,7 +31,7 @@ Route::middleware(['auth'])->group(function () {
 
     
     // Episodes
-    Route::prefix('courses/{course}')->group(function () {
+    Route::prefix('courses/{course:slug}')->group(function () {
         Route::get('episodes/create', [EpisodeController::class, 'create'])->name('episodes.create');
         Route::post('episodes', [EpisodeController::class, 'store'])->name('courses.episodes.store');
         Route::get('episodes/{episode}', [EpisodeController::class, 'show'])->name('courses.episodes.show');
@@ -41,8 +41,8 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // Enrollments
-    Route::post('courses/{course}/enroll', [EnrollmentController::class, 'enroll'])->name('enrollments.enroll');
-    Route::post('courses/{course}/unenroll', [EnrollmentController::class, 'unenroll'])->name('enrollments.unenroll');
+    Route::post('courses/{course:slug}/enroll', [EnrollmentController::class, 'enroll'])->name('enrollments.enroll');
+    Route::post('courses/{course:slug}/unenroll', [EnrollmentController::class, 'unenroll'])->name('enrollments.unenroll');
     Route::get('my-courses', [EnrollmentController::class, 'myCourses'])->name('enrollments.my-courses');
 });
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $course->title)
+@section('title', $course->slug)
 
 @section('content')
     <div class="max-w-7xl mx-auto">
@@ -36,11 +36,11 @@
                         @auth
                             @if (auth()->user()->id === $course->user_id || auth()->user()->isAdmin())
                                 <div class="space-x-2">
-                                    <a href="{{ route('episodes.create', $course) }}"
+                                    <a href="{{ route('episodes.create', $course->slug) }}"
                                         class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded">
                                         Add Episode
                                     </a>
-                                    <a href="{{ route('courses.edit', $course) }}"
+                                    <a href="{{ route('courses.edit', $course->slug) }}"
                                         class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
                                         Edit Course
                                     </a>

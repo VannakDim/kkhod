@@ -7,7 +7,7 @@
     <!-- Navigation -->
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <a href="{{ route('courses.show', $course) }}" class="text-blue-600 hover:text-blue-800">
+            <a href="{{ route('courses.show', $course->slug) }}" class="text-blue-600 hover:text-blue-800">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Course
             </a>
             <h1 class="text-2xl font-bold text-gray-800 mt-2">{{ $course->title }}</h1>
@@ -53,11 +53,34 @@
             <div class="bg-white rounded-lg shadow-md p-6 mt-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-gray-800">{{ $episode->title }}</h2>
-                    <div class="flex items-center space-x-4 text-sm text-gray-500">
-                        <span><i class="fas fa-clock mr-1"></i> {{ $episode->formatted_duration }}</span>
-                        @if($episode->is_preview)
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Preview</span>
-                        @endif
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span><i class="fas fa-clock mr-1"></i> {{ $episode->formatted_duration }}</span>
+                            @if($episode->is_preview)
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Preview</span>
+                            @endif
+                        </div>
+                        
+                        @auth
+                            @if(auth()->user()->is_admin || auth()->user()->id === $course->user_id)
+                                <div class="flex space-x-2">
+                                    <a href="{{ route('episodes.edit', [$course, $episode]) }}" 
+                                       class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded text-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('episodes.destroy', [$course, $episode]) }}" 
+                                          method="POST" 
+                                          onsubmit="return confirm('Are you sure you want to delete this episode?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+                        @endauth
                     </div>
                 </div>
 
