@@ -13,7 +13,21 @@
     <h1 class="text-3xl font-bold text-gray-800 mb-2">Add New Episode</h1>
     <p class="text-gray-600 mb-8">for "{{ $course->title }}"</p>
 
-    <form action="{{ route('courses.episodes.store', $course) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-md p-6">
+    <!-- Progress Indicator (Hidden by default) -->
+    <div id="uploadProgress" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="mb-4">
+            <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700">Uploading video...</span>
+                <span class="text-sm font-medium text-gray-700" id="progressPercent">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                <div id="progressBar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600" id="progressStatus">Please wait while your video is being uploaded...</p>
+    </div>
+
+    <form id="episodeForm" action="{{ route('courses.episodes.store', $course) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-md p-6">
         @csrf
         
         <div class="mb-6">
@@ -87,13 +101,87 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <a href="{{ route('courses.show', $course) }}" class="bg-gray-500 hover:bg-gray-700 text-white py-2 px-6 rounded">
+            <a href="{{ route('courses.show', $course) }}" class="bg-gray-500 hover:bg-gray-700 text-white py-2 px-6 rounded" id="cancelBtn">
                 Cancel
             </a>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded">
+            <button type="submit" id="submitBtn" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded">
                 Add Episode
             </button>
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+document.getElementById('episodeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const progressDiv = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    
+    // Show progress bar and disable buttons
+    progressDiv.classList.remove('hidden');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    cancelBtn.classList.add('pointer-events-none', 'opacity-50');
+    
+    const xhr = new XMLHttpRequest();
+    
+    // Upload progress
+    xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percentComplete + '%';
+            progressPercent.textContent = percentComplete + '%';
+        }
+    });
+    
+    // Upload complete
+    xhr.addEventListener('load', function() {
+        if (xhr.status === 200 || xhr.status === 302) {
+            progressStatus.textContent = 'Upload complete! Redirecting...';
+            progressBar.classList.remove('bg-blue-600');
+            progressBar.classList.add('bg-green-600');
+            
+            // Handle redirect
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                }
+            } catch {
+                // If not JSON, browser will handle redirect
+                window.location.href = "{{ route('courses.show', $course) }}";
+            }
+        } else {
+            progressStatus.textContent = 'Upload failed. Please try again.';
+            progressBar.classList.remove('bg-blue-600');
+            progressBar.classList.add('bg-red-600');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            cancelBtn.classList.remove('pointer-events-none', 'opacity-50');
+        }
+    });
+    
+    // Upload error
+    xhr.addEventListener('error', function() {
+        progressStatus.textContent = 'Upload failed. Please try again.';
+        progressBar.classList.remove('bg-blue-600');
+        progressBar.classList.add('bg-red-600');
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        cancelBtn.classList.remove('pointer-events-none', 'opacity-50');
+    });
+    
+    xhr.open('POST', this.action);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.send(formData);
+});
+</script>
+@endpush
 @endsection
