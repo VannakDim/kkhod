@@ -6,7 +6,8 @@ use App\Models\Course;
 use App\Models\Episode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use League\CommonMark\CommonMarkConverter;
 
 class CourseController extends Controller
@@ -119,10 +120,14 @@ class CourseController extends Controller
 
             $path = $request->file('thumbnail')->store('thumbnails', 'public');
 
-            // Resize image
-            $image = Image::make(storage_path("app/public/{$path}"));
-            $image->fit(400, 300);
-            $image->save();
+            // create image manager with desired driver
+            $manager = new ImageManager(new Driver());
+
+            // read image from file system
+            $image = $manager->read(storage_path("app/public/{$path}"));
+
+            // resize image proportionally to 300px width
+            $image->scale(width: 300);
 
             $validated['thumbnail'] = $path;
         }
