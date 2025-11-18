@@ -53,6 +53,24 @@
     <!-- Popular Courses Section -->
     <div class="py-16">
         <h2 class="text-3xl font-bold text-gray-800 text-center mb-12">Popular Courses</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8">
+            @foreach($popularCourses as $course)
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <a href="{{ route('courses.show', $course->id) }}">
+                        <img src="{{ $course->thumbnail_url }}" alt="{{ $course->title }}" class="w-full h-48 object-cover">
+                    </a>
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                            <a href="{{ route('courses.show', $course->id) }}">{{ $course->title }}</a>
+                        </h3>
+                        <p class="text-gray-600 mb-4">{{ Str::limit($course->description, 80) }}</p>
+                        <a href="{{ route('courses.show', $course->id) }}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
+                            View Course
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
         <div class="text-center">
             <a href="{{ route('courses.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white py-3 px-8 rounded-lg">
                 View All Courses

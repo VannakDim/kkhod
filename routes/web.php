@@ -5,9 +5,11 @@ use App\Http\Controllers\EpisodeController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Course;
 
 Route::get('/', function () {
-    return view('welcome');
+    $popularCourses = Course::orderBy('popularity', 'desc')->take(6)->get();
+    return view('welcome', compact('popularCourses'));
 })->name('home');
 
 Route::get('/dashboard', function () {

@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
+            $table->integer('popularity')->default(0);
             $table->text('description');
             $table->text('outline')->nullable();
             $table->string('thumbnail')->nullable();

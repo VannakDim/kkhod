@@ -7,6 +7,8 @@ use App\Models\Episode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use League\CommonMark\CommonMarkConverter;
+
 
 class EpisodeController extends Controller
 {
@@ -124,6 +126,12 @@ class EpisodeController extends Controller
             abort(403, 'You need to enroll in this course to view this episode.');
         }
 
+        $converter = new CommonMarkConverter([
+            'html_input' => 'allow',
+            'allow_unsafe_links' => false,
+        ]);
+        $episode->description_html = $converter->convertToHtml($episode->description);
+
         $nextEpisode = $course->episodes()
             ->where('order', '>', $episode->order)
             ->orderBy('order')
@@ -136,5 +144,4 @@ class EpisodeController extends Controller
 
         return view('episodes.show', compact('course', 'episode', 'nextEpisode', 'prevEpisode', 'isEnrolled'));
     }
-
 }

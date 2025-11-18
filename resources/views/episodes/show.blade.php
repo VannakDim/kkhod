@@ -63,7 +63,9 @@
 
                 @if($episode->description)
                     <div class="prose max-w-none text-gray-600">
-                        {!! nl2br(e($episode->description)) !!}
+                        <div class="prose prose-slate max-w-none">
+                            {!! Str::markdown($episode->description_html) !!}
+                        </div>
                     </div>
                 @endif
 
