@@ -10,7 +10,7 @@
     <script src="//unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <link rel="icon" type="image/png" href="{{ asset('storage/logo/kkhod.png') }}">
     <style>
         .code-block {
             position: relative;
@@ -42,10 +42,13 @@
     <!-- Nav -->
     <nav class="bg-white shadow-lg" x-data="{ open: false, dropdown: false }">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
+            <div class="flex justify-between items-center py-0">
 
                 <!-- Logo -->
-                <a href="{{ route('home') }}" class="text-xl font-bold text-gray-800">K KHOD</a>
+                <a href="{{ route('home') }}" class="flex items-center space-x-2 text-xl font-bold text-gray-800">
+                    <img src="{{ asset('storage/logo/logo-transparency.png') }}" alt="Logo" class="h-20 w-20">
+                    {{-- <span>K KHOD</span> --}}
+                </a>
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-6">
@@ -143,7 +146,17 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 mt-12">
+    <footer class="bg-gray-800 text-white py-8 mt-12 w-full"
+        x-data
+        x-init="
+            if (document.body.offsetHeight < window.innerHeight) {
+                $el.style.position = 'fixed';
+                $el.style.left = '0';
+                $el.style.bottom = '0';
+            } else {
+                $el.style.position = 'static';
+            }
+        ">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <p>&copy; {{ date('Y') }} LearnPlatform. All rights reserved.</p>
         </div>
