@@ -79,7 +79,6 @@
                             <h3 class="text-lg font-semibold text-gray-700 mb-3">Course Outline</h3>
                             <div class="episode-content prose max-w-none text-gray-600">
                                 {!! $course->outline_html !!}
-                                {{-- <pre><code >{{ $course->outline }}</code></pre> --}}
                             </div>
                         </div>
                     @endif
