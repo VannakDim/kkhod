@@ -134,6 +134,7 @@ document.getElementById('episodeForm').addEventListener('submit', function(e) {
     
     let startTime = Date.now();
     let uploadedLast = 0;
+    let lastTime = startTime;
     
     const xhr = new XMLHttpRequest();
     
@@ -142,27 +143,34 @@ document.getElementById('episodeForm').addEventListener('submit', function(e) {
             const percentComplete = (e.loaded / e.total) * 100;
             const currentTime = Date.now();
             const elapsedTime = (currentTime - startTime) / 1000; // seconds
+            const timeDiff = (currentTime - lastTime) / 1000; // seconds
             
             // Update progress bar
             progressBar.style.width = percentComplete + '%';
             progressText.textContent = Math.round(percentComplete) + '% Complete';
             
             // Calculate speed
-            const uploadedNow = e.loaded;
-            const speed = (uploadedNow - uploadedLast) / 1024 / 1024; // MB/s
-            uploadedLast = uploadedNow;
-            uploadSpeed.textContent = 'Speed: ' + speed.toFixed(2) + ' MB/s';
+            if (timeDiff > 0) {
+                const uploadedNow = e.loaded;
+                const speed = ((uploadedNow - uploadedLast) / timeDiff) / 1024 / 1024; // MB/s
+                uploadedLast = uploadedNow;
+                lastTime = currentTime;
+                uploadSpeed.textContent = 'Speed: ' + Math.max(0, speed).toFixed(2) + ' MB/s';
+            }
             
             // Calculate time remaining
-            const bytesRemaining = e.total - e.loaded;
-            const secondsRemaining = bytesRemaining / (uploadedNow / elapsedTime);
-            
-            if (secondsRemaining > 60) {
-                const minutes = Math.floor(secondsRemaining / 60);
-                const seconds = Math.floor(secondsRemaining % 60);
-                timeRemaining.textContent = 'Time remaining: ' + minutes + 'm ' + seconds + 's';
-            } else {
-                timeRemaining.textContent = 'Time remaining: ' + Math.floor(secondsRemaining) + 's';
+            if (elapsedTime > 0 && e.loaded > 0) {
+                const bytesRemaining = e.total - e.loaded;
+                const avgSpeed = e.loaded / elapsedTime; // bytes per second
+                const secondsRemaining = bytesRemaining / avgSpeed;
+                
+                if (secondsRemaining > 60) {
+                    const minutes = Math.floor(secondsRemaining / 60);
+                    const seconds = Math.floor(secondsRemaining % 60);
+                    timeRemaining.textContent = 'Time remaining: ' + minutes + 'm ' + seconds + 's';
+                } else {
+                    timeRemaining.textContent = 'Time remaining: ' + Math.floor(secondsRemaining) + 's';
+                }
             }
             
             // Update file size
@@ -175,10 +183,14 @@ document.getElementById('episodeForm').addEventListener('submit', function(e) {
     xhr.addEventListener('load', function() {
         if (xhr.status === 200 || xhr.status === 302) {
             progressText.textContent = 'Upload Complete! Redirecting...';
-            const response = JSON.parse(xhr.responseText);
-            if (response.redirect) {
-                window.location.href = response.redirect;
-            } else {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                } else {
+                    window.location.href = form.action.replace('/episodes', '');
+                }
+            } catch (e) {
                 window.location.href = form.action.replace('/episodes', '');
             }
         } else {
@@ -194,6 +206,7 @@ document.getElementById('episodeForm').addEventListener('submit', function(e) {
     
     xhr.open('POST', form.action);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
     xhr.send(formData);
 });
 </script>
