@@ -13,20 +13,6 @@
     <h1 class="text-3xl font-bold text-gray-800 mb-2">Add New Episode</h1>
     <p class="text-gray-600 mb-8">for "{{ $course->title }}"</p>
 
-    <!-- Progress Indicator (Hidden by default) -->
-    <div id="uploadProgress" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
-        <div class="mb-4">
-            <div class="flex justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">Uploading video...</span>
-                <span class="text-sm font-medium text-gray-700" id="progressPercent">0%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-4">
-                <div id="progressBar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
-            </div>
-        </div>
-        <p class="text-sm text-gray-600" id="progressStatus">Please wait while your video is being uploaded...</p>
-    </div>
-
     <form id="episodeForm" action="{{ route('courses.episodes.store', $course) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-md p-6">
         @csrf
         
@@ -101,14 +87,32 @@
         </div>
 
         <div class="flex items-center justify-between">
-            <a href="{{ route('courses.show', $course) }}" class="bg-gray-500 hover:bg-gray-700 text-white py-2 px-6 rounded" id="cancelBtn">
+            <a href="{{ route('courses.show', $course) }}" class="bg-gray-500 hover:bg-gray-700 text-white py-2 px-6 rounded">
                 Cancel
             </a>
-            <button type="submit" id="submitBtn" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded">
                 Add Episode
             </button>
         </div>
     </form>
+</div>
+
+<!-- Upload Progress Modal -->
+<div id="uploadModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Uploading Episode</h3>
+            <div class="mt-4 px-7 py-3">
+                <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
+                    <div id="progressBar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-sm text-gray-600 mb-2">0% Complete</p>
+                <p id="uploadSpeed" class="text-sm text-gray-500">Speed: -- MB/s</p>
+                <p id="timeRemaining" class="text-sm text-gray-500">Time remaining: Calculating...</p>
+                <p id="fileSize" class="text-sm text-gray-500 mt-2">Uploaded: 0 MB / 0 MB</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -116,69 +120,79 @@
 document.getElementById('episodeForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    const formData = new FormData(this);
-    const progressDiv = document.getElementById('uploadProgress');
+    const form = this;
+    const formData = new FormData(form);
+    const modal = document.getElementById('uploadModal');
     const progressBar = document.getElementById('progressBar');
-    const progressPercent = document.getElementById('progressPercent');
-    const progressStatus = document.getElementById('progressStatus');
-    const submitBtn = document.getElementById('submitBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
+    const progressText = document.getElementById('progressText');
+    const uploadSpeed = document.getElementById('uploadSpeed');
+    const timeRemaining = document.getElementById('timeRemaining');
+    const fileSize = document.getElementById('fileSize');
     
-    // Show progress bar and disable buttons
-    progressDiv.classList.remove('hidden');
-    submitBtn.disabled = true;
-    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    cancelBtn.classList.add('pointer-events-none', 'opacity-50');
+    // Show modal
+    modal.classList.remove('hidden');
+    
+    let startTime = Date.now();
+    let uploadedLast = 0;
     
     const xhr = new XMLHttpRequest();
     
-    // Upload progress
     xhr.upload.addEventListener('progress', function(e) {
         if (e.lengthComputable) {
-            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            const percentComplete = (e.loaded / e.total) * 100;
+            const currentTime = Date.now();
+            const elapsedTime = (currentTime - startTime) / 1000; // seconds
+            
+            // Update progress bar
             progressBar.style.width = percentComplete + '%';
-            progressPercent.textContent = percentComplete + '%';
+            progressText.textContent = Math.round(percentComplete) + '% Complete';
+            
+            // Calculate speed
+            const uploadedNow = e.loaded;
+            const speed = (uploadedNow - uploadedLast) / 1024 / 1024; // MB/s
+            uploadedLast = uploadedNow;
+            uploadSpeed.textContent = 'Speed: ' + speed.toFixed(2) + ' MB/s';
+            
+            // Calculate time remaining
+            const bytesRemaining = e.total - e.loaded;
+            const secondsRemaining = bytesRemaining / (uploadedNow / elapsedTime);
+            
+            if (secondsRemaining > 60) {
+                const minutes = Math.floor(secondsRemaining / 60);
+                const seconds = Math.floor(secondsRemaining % 60);
+                timeRemaining.textContent = 'Time remaining: ' + minutes + 'm ' + seconds + 's';
+            } else {
+                timeRemaining.textContent = 'Time remaining: ' + Math.floor(secondsRemaining) + 's';
+            }
+            
+            // Update file size
+            const loadedMB = (e.loaded / 1024 / 1024).toFixed(2);
+            const totalMB = (e.total / 1024 / 1024).toFixed(2);
+            fileSize.textContent = 'Uploaded: ' + loadedMB + ' MB / ' + totalMB + ' MB';
         }
     });
     
-    // Upload complete
     xhr.addEventListener('load', function() {
         if (xhr.status === 200 || xhr.status === 302) {
-            progressStatus.textContent = 'Upload complete! Redirecting...';
-            progressBar.classList.remove('bg-blue-600');
-            progressBar.classList.add('bg-green-600');
-            
-            // Handle redirect
-            try {
-                const response = JSON.parse(xhr.responseText);
-                if (response.redirect) {
-                    window.location.href = response.redirect;
-                }
-            } catch {
-                // If not JSON, browser will handle redirect
-                window.location.href = "{{ route('courses.show', $course) }}";
+            progressText.textContent = 'Upload Complete! Redirecting...';
+            const response = JSON.parse(xhr.responseText);
+            if (response.redirect) {
+                window.location.href = response.redirect;
+            } else {
+                window.location.href = form.action.replace('/episodes', '');
             }
         } else {
-            progressStatus.textContent = 'Upload failed. Please try again.';
-            progressBar.classList.remove('bg-blue-600');
-            progressBar.classList.add('bg-red-600');
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            cancelBtn.classList.remove('pointer-events-none', 'opacity-50');
+            alert('Upload failed. Please try again.');
+            modal.classList.add('hidden');
         }
     });
     
-    // Upload error
     xhr.addEventListener('error', function() {
-        progressStatus.textContent = 'Upload failed. Please try again.';
-        progressBar.classList.remove('bg-blue-600');
-        progressBar.classList.add('bg-red-600');
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        cancelBtn.classList.remove('pointer-events-none', 'opacity-50');
+        alert('Upload error. Please check your connection and try again.');
+        modal.classList.add('hidden');
     });
     
-    xhr.open('POST', this.action);
+    xhr.open('POST', form.action);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     xhr.send(formData);
 });

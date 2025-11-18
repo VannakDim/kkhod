@@ -37,8 +37,8 @@ class EpisodeController extends Controller
             'is_preview' => 'boolean',
         ]);
 
-        // Handle video upload
-        $videoPath = $request->file('video')->store('videos', 'public');
+        // Store video temporarily
+        $videoPath = $request->file('video')->store('videos/temp', 'public');
         $validated['video_url'] = $videoPath;
 
         // Handle file attachments
@@ -49,9 +49,12 @@ class EpisodeController extends Controller
 
         $validated['course_id'] = $course->id;
 
-        Episode::create($validated);
+        $episode = Episode::create($validated);
 
-        return redirect()->route('courses.show', $course)->with('success', 'Episode added successfully!');
+        // Dispatch job to process video in background
+        \App\Jobs\ProcessVideoUpload::dispatch($episode, $videoPath);
+
+        return redirect()->route('courses.show', $course)->with('success', 'Episode is being processed. This may take a few minutes.');
     }
 
     public function edit(Course $course, Episode $episode)
