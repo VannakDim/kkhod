@@ -26,7 +26,7 @@
 
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-500">By {{ $course->user->name }}</span>
-                        <a href="{{ route('courses.show', $course) }}"
+                        <a href="{{ route('courses.show', $course->slug) }}"
                             class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm">
                             View Course
                         </a>
