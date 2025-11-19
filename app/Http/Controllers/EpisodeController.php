@@ -54,7 +54,7 @@ class EpisodeController extends Controller
         // Dispatch job to process video in background
         \App\Jobs\ProcessVideoUpload::dispatch($episode, $videoPath);
 
-        return redirect()->route('courses.show', $course)->with('success', 'Episode is being processed. This may take a few minutes.');
+        return redirect()->route('courses.show', $course->slug)->with('success', 'Episode is being processed. This may take a few minutes.');
     }
 
     public function edit(Course $course, Episode $episode)
@@ -104,22 +104,22 @@ class EpisodeController extends Controller
         return redirect()->route('courses.show', $course)->with('success', 'Episode updated successfully!');
     }
 
-    // public function destroy(Course $course, Episode $episode)
-    // {
-    //     $this->authorize('update', $course);
+    public function destroy(Course $course, Episode $episode)
+    {
+        // $this->authorize('update', $course);
 
-    //     // Delete associated files
-    //     if ($episode->video_url) {
-    //         Storage::disk('public')->delete($episode->getRawOriginal('video_url'));
-    //     }
-    //     if ($episode->file_attachments) {
-    //         Storage::disk('public')->delete($episode->getRawOriginal('file_attachments'));
-    //     }
+        // Delete associated files
+        if ($episode->video_url) {
+            Storage::disk('public')->delete($episode->getRawOriginal('video_url'));
+        }
+        if ($episode->file_attachments) {
+            Storage::disk('public')->delete($episode->getRawOriginal('file_attachments'));
+        }
 
-    //     $episode->delete();
+        $episode->delete();
 
-    //     return redirect()->route('courses.show', $course)->with('success', 'Episode deleted successfully!');
-    // }
+        return redirect()->route('courses.show', $course->slug)->with('success', 'Episode deleted successfully!');
+    }
 
     public function show(Course $course, Episode $episode)
     {
