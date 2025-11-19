@@ -46,8 +46,8 @@
 
                 <!-- Logo -->
                 <a href="{{ route('home') }}" class="flex items-center space-x-2 text-xl font-bold text-gray-800">
-                    <img src="{{ asset('storage/logo/logo-transparency.png') }}" alt="Logo" class="h-20 w-20">
-                    {{-- <span>K KHOD</span> --}}
+                    {{-- <img src="{{ asset('storage/logo/logo-transparency.png') }}" alt="Logo" class="h-20 w-20"> --}}
+                    <span>K KHOD</span>
                 </a>
 
                 <!-- Desktop Menu -->
