@@ -102,9 +102,9 @@ class CourseController extends Controller
         return view('courses.edit', compact('course'));
     }
 
-    public function update(Request $request, $slug)
+    public function update(Request $request, Course $course)
     {
-        $course = Course::where('slug', $slug)->firstOrFail();
+        
         // $this->authorize('update', $course);
 
         $validated = $request->validate([
