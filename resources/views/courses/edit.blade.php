@@ -90,7 +90,7 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <a href="{{ route('courses.show', $course) }}"
+                <a href="{{ route('courses.show', $course->slug) }}"
                     class="bg-gray-500 hover:bg-gray-700 text-white py-2 px-6 rounded">
                     Cancel
                 </a>
