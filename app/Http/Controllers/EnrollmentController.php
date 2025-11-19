@@ -18,7 +18,7 @@ class EnrollmentController extends Controller
     {
         // Check if already enrolled
         if (Auth::user()->enrolledCourses->contains($course->id)) {
-            return redirect()->route('courses.show', $course)->with('info', 'You are already enrolled in this course.');
+            return redirect()->route('courses.show', $course->slug)->with('info', 'You are already enrolled in this course.');
         }
 
         // For now, free enrollment. You can add payment logic here later
@@ -27,7 +27,7 @@ class EnrollmentController extends Controller
             'course_id' => $course->id,
         ]);
 
-        return redirect()->route('courses.show', $course)->with('success', 'Successfully enrolled in the course!');
+        return redirect()->route('courses.show', $course->slug)->with('success', 'Successfully enrolled in the course!');
     }
 
     public function unenroll(Course $course)
